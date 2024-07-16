@@ -1,0 +1,31 @@
+import os
+import requests
+from tqdm import tqdm
+
+def download_file(url, save_path, chunk_size=1024):
+    response = requests.get(url, stream=True)
+    total_size = int(response.headers.get('content-length', 0))
+
+    with open(save_path, 'wb') as file, tqdm(
+        desc=save_path,
+        total=total_size,
+        unit='B',
+        unit_scale=True,
+        unit_divisor=1024,
+    ) as bar:
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            bar.update(len(chunk))
+            file.write(chunk)
+
+if __name__ == "__main__":
+    url = input("Enter the URL of the file to download: ")
+    save_dir = input("Enter the directory to save the file: ")
+
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    file_name = url.split('/')[-1]
+    save_path = os.path.join(save_dir, file_name)
+
+    download_file(url, save_path)
+    print(f"File downloaded to: {save_path}")
